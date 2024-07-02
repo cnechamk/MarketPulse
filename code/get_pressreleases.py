@@ -1,14 +1,22 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 import requests
 from bs4 import BeautifulSoup
 import re
+import os
 import pandas as pd
 base_url = 'https://www.federalreserve.gov'
+
+
+# In[6]:
+
+
+if 'data' not in os.listdir('../'):
+    os.mkdir('../data')
 
 
 # In[2]:
@@ -47,5 +55,11 @@ for year_tag in soup.find(attrs={'id':'article'}).find_all('a'):
 # In[7]:
 
 
-pd.DataFrame(all_events).to_csv('pressreleases.csv', index=False)
+pd.DataFrame(all_events).to_csv('../data/pressreleases.csv', index=False)
+
+
+# In[ ]:
+
+
+pd.DataFrame()
 
