@@ -8,7 +8,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import re
-from tqdm.notebook import tqdm
+from tqdm.auto import tqdm
 from concurrent.futures import ThreadPoolExecutor
 # from IPython.display import HTML
 
@@ -18,7 +18,7 @@ base_url = 'https://www.federalreserve.gov'
 # In[2]:
 
 
-df = pd.read_csv('../data/pressreleases.csv').reset_index(names='id')
+df = pd.read_csv('./data/pressreleases.csv').reset_index(names='id')
 df.index = pd.to_datetime(df.date)
 
 
@@ -61,6 +61,7 @@ class Collector:
         self.failed = {}
         self.failed_link = {}
         self.link_docs = {}
+        self.link_urls = {}
         self.prog = tqdm(total=len(self.df)-len(self.docs))
 
     def __call__(self, row):
@@ -79,7 +80,7 @@ class Collector:
         try:
             r = requests.get(row['link'])
             if not r.ok:
-                failed[row.id] = r
+                self.failed[row.id] = r
                 return
             soup = BeautifulSoup(r.content)
         except Exception as e:
@@ -103,9 +104,9 @@ class Collector:
                 link_url != base_url + '/fomc'
             )):
                 link_urls.add(link_url)
-
+        self.link_urls[row.id] = list(link_urls)
         link_articles = []
-        for link_url in link_urls:
+        for link_url in self.link_urls[row.id]:
             try:
                 r = requests.get(link_url)
                 if not r.ok:
@@ -178,6 +179,7 @@ docs = pd.DataFrame(pd.Series(c.docs, name='doc'))
 
 links = pd.DataFrame.from_dict(c.link_docs, orient='index')
 links.columns = [f'link_{i}' for i in links]
+links['link_urls'] = c.link_urls
 
 
 # In[14]:
@@ -189,7 +191,7 @@ df = df.merge(docs.join(links), left_on='id', right_index=True)
 # In[15]:
 
 
-df.to_parquet('../data/Monetary_Policy.parquet')
+df.to_parquet('./data/Monetary_Policy.parquet')
 
 
 # In[ ]:
