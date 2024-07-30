@@ -10,10 +10,12 @@ from sklearn.decomposition import PCA
 
 ENCODE_NAME = 'philschmid/bge-base-financial-matryoshka'
 
+
 def encode_docs(docs):
     encoder = SentenceTransformer(ENCODE_NAME)
     X = encoder.encode(docs.tolist(), show_progress_bar=True)
     return X
+
 
 def multioutput_scorer(scorer, y_true, y_pred, **kwargs):
     def f(series, scorer, **kwargs):
@@ -32,6 +34,7 @@ def multioutput_scorer(scorer, y_true, y_pred, **kwargs):
     results = df.apply(f, scorer=scorer, result_type='expand', **kwargs)
     return results.T
 
+
 def get_model():
     reg=LinearRegression()
     model = make_pipeline(
@@ -43,14 +46,12 @@ def get_model():
     )
     return model
 
+
 def get_optimal_threshold(y, p):
     fpr, tpr, thresholds = roc_curve(y>0, p, drop_intermediate=True)
     opt_idx = np.argmax(tpr-fpr)
     # print(opt_idx)
     return thresholds[opt_idx]
-
-def main(docs):
-    X
 
 
 if __name__ == "__main__":
@@ -68,7 +69,5 @@ if __name__ == "__main__":
     y_pred = model.predict(X_test)
     y_pred = pd.DataFrame(y_pred, index=y_test.index, columns=y_test.columns)
 
-    y_pred.to_csv("data/y_pred.csv")
-    y_test.to_csv("data/y_true.csv")
-
-
+    y_pred.to_csv("data/tmp/y_pred.csv")
+    y_test.to_csv("data/tmp/y_true.csv")
