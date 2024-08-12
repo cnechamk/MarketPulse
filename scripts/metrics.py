@@ -3,36 +3,43 @@ from scipy.stats import pearsonr
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import balanced_accuracy_score, mean_squared_error
 
+
 def multioutput_scorer(scorer, y_true, y_pred, **kwargs):
-    
+    """Scores multioutput predictions giving one score per column"""
+
     def f(series, scorer, **kwargs):
 
-        score = scorer(series['y_true'], series['y_pred'])
+        score = scorer(series["y_true"], series["y_pred"])
         try:
             ci = score.confidence_interval()
         except AttributeError:
-            return {'Score':score}
+            return {"Score": score}
         else:
-            result = {'Score':score[0]}
-            result.update(zip(['low', 'high'],ci))
-            
+            result = {"Score": score[0]}
+            result.update(zip(["low", "high"], ci))
+
             return pd.Series(result)
-        
+
     y_pred = pd.DataFrame(y_pred, index=y_true.index, columns=y_true.columns)
-    df = pd.concat([y_true, y_pred], keys=['y_true', 'y_pred'])
-    results = df.apply(f, scorer=scorer, result_type='expand', **kwargs)
+    df = pd.concat([y_true, y_pred], keys=["y_true", "y_pred"])
+    results = df.apply(f, scorer=scorer, result_type="expand", **kwargs)
+
     return results.T
 
-def get_scores(y_true, y_pred, threshold=0):
 
-    acc = multioutput_scorer(balanced_accuracy_score, y_true>0, y_pred>threshold)
-    acc = acc.unstack().mean()['Score'].rename('acc')
+def get_scores(y_true, y_pred, threshold=0):
+    """Get balanced accuracy, pearson correlation,
+    and scaled mean squared error for multioutput
+    predictions"""
+
+    acc = multioutput_scorer(balanced_accuracy_score, y_true > 0, y_pred > threshold)
+    acc = acc.unstack().mean()["Score"].rename("acc")
     pearson = multioutput_scorer(pearsonr, y_true, y_pred)
-    pearson = pearson.unstack().mean()['Score'].rename('pearson')
+    pearson = pearson.unstack().mean()["Score"].rename("pearson")
     scaler = StandardScaler()
     t = pd.DataFrame(scaler.fit_transform(y_true), y_true.index, y_true.columns)
     p = pd.DataFrame(scaler.transform(y_pred), y_true.index, y_true.columns)
     mse = multioutput_scorer(mean_squared_error, t, p, squared=True)
-    mse = mse.unstack().mean()['Score'].rename('mse')
-    
+    mse = mse.unstack().mean()["Score"].rename("mse")
+
     return pd.concat([acc, mse, pearson], axis=1)

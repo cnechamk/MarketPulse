@@ -8,4 +8,5 @@ matplotlib
 seaborn
 wordcloud
 shap
-sentence_transformers
+sentence-transformers
+beautifulsoup4
