@@ -45,8 +45,8 @@ def get_prices(symbols, periods, pre_period, start=None, end=None):
         change = post_change - pre_change
         dfs[post] = change
 
-    df = pd.concat(dfs, names=['Period', 'Ticker'], axis=1)
-    df = df.dropna(how='all')
+    df = pd.concat(dfs, names=['Day', 'Ticker'], axis=1)
+    df = df.dropna(how='all').asfreq('D').bfill()
     
     symbols = pd.Series(range(len(symbols)), index=symbols.values())
     mapper = lambda index: symbols[index]

@@ -2,4 +2,5 @@
 .ipynb_checkpoints
 .notebooks
 data
-scripts\__pycache__
+models
+**/__pycache__

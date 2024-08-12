@@ -1,0 +1,11 @@
+jupyter
+numpy
+pandas
+scipy
+sklearn
+yfinance
+matplotlib
+seaborn
+wordcloud
+shap
+sentence_transformers
