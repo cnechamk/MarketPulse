@@ -1,7 +1,6 @@
 import pandas as pd
 from scipy.stats import pearsonr
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import balanced_accuracy_score, mean_squared_error
+from sklearn.metrics import balanced_accuracy_score, r2_score
 
 
 def multioutput_scorer(scorer, y_true, y_pred, **kwargs):
@@ -36,10 +35,7 @@ def get_scores(y_true, y_pred, threshold=0):
     acc = acc.unstack().mean()["Score"].rename("acc")
     pearson = multioutput_scorer(pearsonr, y_true, y_pred)
     pearson = pearson.unstack().mean()["Score"].rename("pearson")
-    scaler = StandardScaler()
-    t = pd.DataFrame(scaler.fit_transform(y_true), y_true.index, y_true.columns)
-    p = pd.DataFrame(scaler.transform(y_pred), y_true.index, y_true.columns)
-    mse = multioutput_scorer(mean_squared_error, t, p, squared=True)
-    mse = mse.unstack().mean()["Score"].rename("mse")
+    r2 = multioutput_scorer(r2_score, y_true, y_pred)
+    r2 = r2.unstack().mean()["Score"].rename("r2")
 
-    return pd.concat([acc, mse, pearson], axis=1)
+    return pd.concat([acc, r2, pearson], axis=1)
