@@ -178,14 +178,14 @@ def shap_plot(model, X, y, dates, period, mask_pat=r"\W"):
     shap_model = ShapModel(model, period, y)
     explainer = shap.Explainer(shap_model, masker, output_names=ticker_names)
     shap_values = explainer(examples, silent=True)
-    
+
     for i, date in enumerate(dates):
         print(date.strftime("%B %d, %Y"))
         shap.plots.text(shap_values[i])
         
         plot = shap.plots.text(shap_values[i], display=False)
         file_name = f"./plots/{date.strftime('%Y-%m-%d')}.html"
-        with open(file_name, "w") as file:
+        with open(file_name, "w", encoding="utf-8") as file:
             file.write(plot)
 
     return shap_values
