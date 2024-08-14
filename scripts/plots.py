@@ -11,7 +11,7 @@ from sklearn.metrics import balanced_accuracy_score
 from scripts.metrics import multioutput_scorer
 
 try:
-    os.mkdir("/plots")
+    os.mkdir("./plots")
 except FileExistsError:
     pass
 
@@ -41,7 +41,7 @@ def accuracy_plot(X, y, models, threshold=0):
     grid.fig.suptitle("Balanced Accuracy Score")
     grid.fig.set_constrained_layout(True)
 
-    grid.fig.savefig("accuracy_plot.png")
+    grid.fig.savefig("./plots/accuracy_plot.png")
 
     return grid
 
@@ -76,7 +76,7 @@ def correlation_plot(X, y, models):
     grid.fig.suptitle("Spearman Correlation with Confidence Intervals")
     grid.fig.set_constrained_layout(True)
 
-    grid.fig.savefig("correlation_plot.png")
+    grid.fig.savefig("./plots/correlation_plot.png")
 
     return grid
 
@@ -103,7 +103,7 @@ def wordclouds(vocab, features, coefs):
     fig.set_figwidth(15)
     fig.suptitle("Topic Wordclouds")
 
-    fig.savefig("wordclouds.png")
+    fig.savefig("./plots/wordclouds.png")
 
     return fig
 
@@ -126,12 +126,13 @@ def topic_bar_plot(coefs, tickers):
         kind="bar",
         sharey=False,
         sharex=False,
+        palette="Set2"
     )
 
     grid.fig.suptitle("Coeficient of each Topic")
     grid.fig.set_constrained_layout(True)
 
-    grid.fig.savefig("topic_bar_plot.png")
+    grid.fig.savefig("./plots/topic_bar_plot.png")
 
     return grid
 
@@ -177,13 +178,14 @@ def shap_plot(model, X, y, dates, period, mask_pat=r"\W"):
     shap_model = ShapModel(model, period, y)
     explainer = shap.Explainer(shap_model, masker, output_names=ticker_names)
     shap_values = explainer(examples, silent=True)
-
+    
     for i, date in enumerate(dates):
         print(date.strftime("%B %d, %Y"))
         shap.plots.text(shap_values[i])
         
         plot = shap.plots.text(shap_values[i], display=False)
-        with open(f"./plots/{date}.html", "w") as f:
-            f.write(plot)
+        file_name = f"./plots/{date.strftime('%Y-%m-%d')}.html"
+        with open(file_name, "w") as file:
+            file.write(plot)
 
     return shap_values
